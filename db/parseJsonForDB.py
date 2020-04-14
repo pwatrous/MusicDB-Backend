@@ -12,7 +12,7 @@ for item in json_array:
                      "release_date":None, "release_date_precision":None, "total_tracks":None,
                      "artists":[]}
     song_details = {"name":None, "href":None, "id":None, "duration_ms":None, "explicit":None,
-                    "is_local":None, "popularity":None, "track_number":None, "album":None, "artists":[]}
+                    "is_local":None, "popularity":None, "track_number":None, "album":[], "artists":[]}
 
     for artist in item["track"]["artists"]:
       artist_details["name"] = artist["name"]
@@ -29,7 +29,7 @@ for item in json_array:
     album_details["total_tracks"] = item["track"]["album"]["total_tracks"]
 
     for artist in item["track"]["album"]["artists"]:
-      album_details["artists"].append(artist["id"])
+      album_details["artists"].append(artist_details)
 
     album_list.append(album_details)
     
@@ -41,10 +41,10 @@ for item in json_array:
     song_details["is_local"] = item["track"]["is_local"]
     song_details["popularity"] = item["track"]["popularity"]
     song_details["track_number"] = item["track"]["track_number"]
-    song_details["album"] = item["track"]["album"]["name"]
+    song_details["album"] = album_details
 
     for artist in item["track"]["album"]["artists"]:
-      song_details["artists"].append(artist["id"])
+      song_details["artists"].append(artist_details)
 
     song_list.append(song_details)
 
