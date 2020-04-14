@@ -48,4 +48,4 @@ for item in json_array:
 
     song_list.append(song_details)
 
-print(artist_list)
+print(song_list)
