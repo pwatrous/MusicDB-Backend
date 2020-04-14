@@ -33,17 +33,17 @@ class Track(Node):
 
     type = "Track"
 
-    def __init__(self):
+    def __init__(self, prop):
         # TODO figure out what params to expect
-        self.name = ""
-        self.href = ""
-        self.id = ""
-        self.uri = ""
-        self.duration_ms = 0
-        self.explicit = False
-        self.is_local = False
-        self.popularity = 0
-        self.track_number = 1
+        self.name = prop["name"]
+        self.href = prop["href"]
+        self.id = prop["id"]
+        self.uri = "spotify" + type.lower() + ":" + self.id
+        self.duration_ms = prop["duration_ms"]
+        self.explicit = prop["explicit"]
+        self.is_local = prop["is_local"]
+        self.popularity = prop["popularity"]
+        self.track_number = prop["track_number"]
 
         # TODO track features
 
@@ -73,16 +73,16 @@ class Album(Node):
 
     type = "Album"
 
-    def __init__(self):
+    def __init__(self, prop):
         # TODO figure out what params to expect
-        self.name = ""
-        self.href = ""
-        self.id = ""
-        self.uri = ""
-        self.album_type = ""
-        self.release_date = ""  # yyyy-mm-dd
-        self.release_date_precision = ""  # e.g., "day"
-        self.total_tracks = 0
+        self.name = prop["name"]
+        self.href = prop["href"]
+        self.id = prop["id"]
+        self.uri = "spotify" + type.lower() + ":" + self.id
+        self.album_type = prop["album_type"]
+        self.release_date = prop["release_date"]  # yyyy-mm-dd
+        self.release_date_precision = prop["release_date_precision"]  # e.g., "day"
+        self.total_tracks = prop["total_tracks"]
         self.artists = []  # TODO create Artist objects and store here
 
     def as_graph_node(self):
@@ -94,7 +94,7 @@ class Album(Node):
         # FIXME make sure duplicate node is not being added
         tx.create(self.as_graph_node())
         tx.proces()
-        
+
         for artist in self.artists:  # create Relationship: Album HAS Artist
             if node_exists("Artist", artist) is None:
                 tx.create(Has(self, artist).as_graph_edge())
@@ -104,12 +104,12 @@ class Artist(Node):
 
     type = "Artist"
 
-    def __init__(self):
+    def __init__(self, prop):
         # TODO figure out what params to expect
-        self.name = ""
-        self.href = ""
-        self.id = ""
-        self.uri = ""
+        self.name = prop["name"]
+        self.href = prop["href"]
+        self.id = prop["id"]
+        self.uri = "spotify" + type.lower() + ":" + self.id
 
     def as_graph_node(self):
         return Node(type, name=self.name, href=self.href, id=self.id, uri=self.uri)
