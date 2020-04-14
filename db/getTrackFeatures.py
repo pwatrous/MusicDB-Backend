@@ -1,11 +1,13 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
+cid = '403bf1e615234ed6944b99a889501fc4'
+secret = '11da18e5e66049ba8a62b703ec4e314c'
+
 
 # Set environment variables SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET
 def spotifyAuth():
-    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-
+    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id=cid, client_secret=secret))
     return sp
 
 
@@ -16,7 +18,7 @@ def getSongIDs(songs):
     '''Given a list of Spotify songs, return a list of their ids'''
     ids = []
     for i in range(len(songs)):
-        ids.append(songs[i]['track']['id'])
+        ids.append(songs[i]['id'])
     return ids
 
 def getSongFeatures(songs):
