@@ -18,12 +18,15 @@ def main():
 
     tx = graph.begin()  # creates a transaction
 
-    tracks = []
-    # TODO parse inputs from frontend and fill tracks
+    tracks = []  # TODO get json
+
+    # TODO make new list of just song ids?
+    # could have song ids map to dictionary of features
 
     for track in tracks:
-        if node_exists("Track", track) is None:  # track does not already exist in graph
-            track.commit_to_graph(tx)  # FIXME add param track first?
+        track_obj = Track(track)
+        if node_exists("Track", track_obj) is None:  # track does not already exist in graph
+            track_obj.commit_to_graph(tx)  # FIXME add param track first?
 
     tx.commit()  # commits the transaction
 
@@ -47,8 +50,12 @@ class Track(Node):
 
         # TODO track features
 
-        self.albums = []  # TODO create Album objects and store here
-        self.artists = []  # TODO create Artist objects and store here
+        self.albums = Album(prop["album"])
+
+        self.artists = []
+
+        for artist in prop["artists"]:
+            self.artists.append(Artist(artist))
 
     def as_graph_node(self):
         return Node(type, name=self.name, href=self.href, id=self.id, uri=self.uri, duration_ms=self.duration_ms,
@@ -83,7 +90,11 @@ class Album(Node):
         self.release_date = prop["release_date"]  # yyyy-mm-dd
         self.release_date_precision = prop["release_date_precision"]  # e.g., "day"
         self.total_tracks = prop["total_tracks"]
-        self.artists = []  # TODO create Artist objects and store here
+
+        self.artists = []
+
+        for artist in prop["artists"]:
+            self.artists.append(Artist(artist))
 
     def as_graph_node(self):
         return Node(type, name=self.name, href=self.href, id=self.id, uri=self.uri, album_type=self.album_type,
@@ -91,7 +102,6 @@ class Album(Node):
                     total_tracks=self.total_tracks)
 
     def commit_to_graph(self, tx):
-        # FIXME make sure duplicate node is not being added
         tx.create(self.as_graph_node())
         tx.proces()
 
@@ -105,7 +115,6 @@ class Artist(Node):
     type = "Artist"
 
     def __init__(self, prop):
-        # TODO figure out what params to expect
         self.name = prop["name"]
         self.href = prop["href"]
         self.id = prop["id"]
@@ -115,6 +124,5 @@ class Artist(Node):
         return Node(type, name=self.name, href=self.href, id=self.id, uri=self.uri)
 
     def commit_to_graph(self, tx):
-        # FIXME make sure duplicate node is not being added
         tx.create(self)
         tx.process()
