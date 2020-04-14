@@ -42,3 +42,20 @@ def getSongFeatures(songs):
     # The list songFeatures should contain all necessary information about songs
     # Each entry is a track with the song id, song title, artist, popularity, and its audio features
     return songFeatures
+
+def getSongFeaturesFromIDs(ids):
+    '''Given a list of song ids, return a dictionary with ids mapped to song features'''
+
+    sp = spotifyAuth()
+    # songFeatures = []
+    songFeatures = {}
+    k = 0
+    for i in range(0, len(ids), 50):
+        audio_features = sp.audio_features(ids[i:i+50])
+        for track in audio_features:
+            if track != None:
+                songFeatures[ids[k]] = track
+            else:
+                break
+
+    return songFeatures
