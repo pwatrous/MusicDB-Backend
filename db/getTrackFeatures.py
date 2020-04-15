@@ -57,6 +57,7 @@ def getSongFeaturesFromIDs(ids):
         for track in audio_features:
             if track != None:
                 songFeatures[ids[k]] = track
+                k += 1
             else:
                 break
 
