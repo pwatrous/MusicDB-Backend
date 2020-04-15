@@ -32,6 +32,34 @@ def node_exists(label, node):
     return matcher.match(label, name=node.name).first()
 
 
+#Every track will have a list of feature, and we can use this list of feature to find similar tracks that are produced by other artists
+#Feature()
+#For every tracks that this user liked, we run this query with this track and other tracks produced by the same artist
+#Expected output: The similarity between every tracks in the list.
+#We will take the top 2 - 3 songs that has the highest similarity to this track, and recommend it to the user
+#In the future, we can run this query on a larger range of tracks to improve the performance
+#For now, due to the technical error, we are not able to run gds.alpha.ml.ann.stream
+def songRecommendation():
+    query = "MATCH (a:Track)-[:Has]->(feature:Feature)"\
+    "WITH {item:id(a), categories: collect(id(Feature))} AS userData"\
+    "WITH collect(userData) AS data"\
+    "CALL gds.alpha.ml.ann.stream({"\
+    "nodeProjection: '*',"\
+    "relationshipProjection: '*',"\
+    "data: data,"\
+    "algorithm: 'jaccard',"\
+    "similarityCutoff: 0.1,"\
+    "concurrency: 1"\
+    "})"\
+    "YIELD item1, item2, similarity"\
+    "return gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity"\
+    "ORDER BY from"
+    result = graph.run(query)
+    return result
+
+
+
+
 class Track(Node):
 
     def __init__(self, prop, features):
