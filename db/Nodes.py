@@ -39,7 +39,7 @@ def node_exists(label, node):
 #We will take the top 2 - 3 songs that has the highest similarity to this track, and recommend it to the user
 #In the future, we can run this query on a larger range of tracks to improve the performance
 #For now, due to the technical error, we are not able to run gds.alpha.ml.ann.stream
-def songRecommendation():
+def song_recommendation():
     query = "MATCH (a:Track)-[:Has]->(feature:Feature)"\
     "WITH {item:id(a), categories: collect(id(Feature))} AS userData"\
     "WITH collect(userData) AS data"\
