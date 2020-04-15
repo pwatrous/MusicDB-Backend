@@ -29,7 +29,7 @@ def main():
 
 def node_exists(label, node):
     matcher = NodeMatcher(graph)
-    return matcher.match(label, name=node.name).first()
+    return matcher.match(label, id=node.id).first()
 
 
 class Track(Node):
