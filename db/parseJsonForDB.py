@@ -8,7 +8,6 @@ def parse(path):
     song_list = []
 
     for item in json_array:
-        artist_details = {"name":None, "href":None, "id":None}
         album_details = {"name":None, "href":None, "id":None, "album_type":None,
                          "release_date":None, "release_date_precision":None, "total_tracks":None,
                          "artists":[]}
@@ -16,6 +15,7 @@ def parse(path):
                         "is_local":None, "popularity":None, "track_number":None, "album":[], "artists":[]}
 
         for artist in item["track"]["artists"]:
+            artist_details = {}
             artist_details["name"] = artist["name"]
             artist_details["href"] = artist["href"]
             artist_details["id"] = artist["id"]
@@ -30,6 +30,7 @@ def parse(path):
         album_details["total_tracks"] = item["track"]["album"]["total_tracks"]
 
         for artist in item["track"]["album"]["artists"]:
+            artist_details = {}
             artist_details["name"] = artist["name"]
             artist_details["href"] = artist["href"]
             artist_details["id"] = artist["id"]
@@ -48,6 +49,7 @@ def parse(path):
         song_details["album"] = album_details
 
         for artist in item["track"]["album"]["artists"]:
+            artist_details = {}
             artist_details["name"] = artist["name"]
             artist_details["href"] = artist["href"]
             artist_details["id"] = artist["id"]

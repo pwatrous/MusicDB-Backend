@@ -29,9 +29,7 @@ def main():
 
 def node_exists(label, node):
     matcher = NodeMatcher(graph)
-    match = matcher.match(label, id=node["id"]).first()
-    return match
-
+    return matcher.match(label, name=node.name).first()
 
 class Track(Node):
 
@@ -64,11 +62,8 @@ class Track(Node):
         self.album = Album(prop["album"])
         # track artists
         self.artists = []
-        print("TRACK:", self.name)
         for artist in prop["artists"]:
-            print(artist["name"])
             self.artists.append(Artist(artist))
-        print("---")
 
     def as_graph_node(self):
         return Node(self.node_type,
@@ -88,9 +83,12 @@ class Track(Node):
         for artist in self.artists:  # create Relationship: Artist CREATES Track
             artist_match = node_exists("Artist", artist)
             if artist_match is None:
+                print("adding: ", artist.name)
                 artist_match = artist.commit_to_graph(tx)
+            else:
+                print("already exists: ", artist.name)
             tx.create(rel.Creates(artist_match, track_node).as_graph_edge())
-        tx.process()
+            tx.process()
 
         album_match = node_exists("Album", self.album)
         if album_match is None:
@@ -132,7 +130,7 @@ class Album(Node):
             if artist_match is None:
                 artist_match = artist.commit_to_graph(tx)
             tx.create(rel.Has(album_node, artist_match).as_graph_edge())
-        tx.process()
+            tx.process()
 
         return album_node
 
