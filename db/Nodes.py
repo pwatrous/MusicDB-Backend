@@ -8,13 +8,6 @@ import Relationships as rel
 
 graph = Graph("bolt://localhost:7687", user=auth.user, password=auth.password)
 
-
-def node_exists(label, node):
-    matcher = NodeMatcher(graph)
-    match = matcher.match(label, id=node["id"]).first()
-    return match
-
-
 def main():
 
     tx = graph.begin()  # creates a transaction
@@ -32,6 +25,12 @@ def main():
                 track_obj.commit_to_graph(tx)
 
     tx.commit()  # commits the transaction
+
+
+def node_exists(label, node):
+    matcher = NodeMatcher(graph)
+    match = matcher.match(label, id=node["id"]).first()
+    return match
 
 
 class Track(Node):
@@ -62,11 +61,14 @@ class Track(Node):
         self.valence = features["valence"]
         self.mode = features["mode"]
         # album
-        self.albums = Album(prop["album"])
+        self.album = Album(prop["album"])
         # track artists
         self.artists = []
+        print("TRACK:", self.name)
         for artist in prop["artists"]:
+            print(artist["name"])
             self.artists.append(Artist(artist))
+        print("---")
 
     def as_graph_node(self):
         return Node(self.node_type,
@@ -79,17 +81,22 @@ class Track(Node):
                     loudness=self.loudness, valence=self.valence, mode=self.mode)
 
     def commit_to_graph(self, tx):
-        tx.create(self.as_graph_node())
+        track_node = self.as_graph_node()
+        tx.create(track_node)
         tx.process()
 
         for artist in self.artists:  # create Relationship: Artist CREATES Track
-            if node_exists("Artist", artist) is None:
-                artist.commit_to_graph(tx)
-            tx.create(rel.Creates(artist.as_graph_node(), self.as_graph_node()).as_graph_edge())
-        for album in self.albums:  # create Relationship: Track APPEARS_ON Album
-            if node_exists("Album", album) is None:
-                album.commit_to_graph(tx)
-            tx.create(rel.AppearsOn(self.as_graph_node(), album.as_graph_node()).as_graph_edge())
+            artist_match = node_exists("Artist", artist)
+            if artist_match is None:
+                artist_match = artist.commit_to_graph(tx)
+            tx.create(rel.Creates(artist_match, track_node).as_graph_edge())
+        tx.process()
+
+        album_match = node_exists("Album", self.album)
+        if album_match is None:
+            album_match = self.album.commit_to_graph(tx)
+        tx.create(rel.AppearsOn(track_node, album_match).as_graph_edge())
+        tx.process()
 
 
 class Album(Node):
@@ -116,12 +123,18 @@ class Album(Node):
                     total_tracks=self.total_tracks)
 
     def commit_to_graph(self, tx):
-        tx.create(self.as_graph_node())
+        album_node = self.as_graph_node()
+        tx.create(album_node)
         tx.process()
 
         for artist in self.artists:  # create Relationship: Album HAS Artist
-            if node_exists("Artist", artist) is None:
-                tx.create(rel.Has(self.as_graph_node(), artist.as_graph_node()).as_graph_edge())
+            artist_match = node_exists("Artist", artist)
+            if artist_match is None:
+                artist_match = artist.commit_to_graph(tx)
+            tx.create(rel.Has(album_node, artist_match).as_graph_edge())
+        tx.process()
+
+        return album_node
 
 
 class Artist(Node):
@@ -138,7 +151,9 @@ class Artist(Node):
         return Node(self.node_type, name=self.name, href=self.href, id=self.id, uri=self.uri)
 
     def commit_to_graph(self, tx):
-        tx.create(self.as_graph_node())
+        artist_node = self.as_graph_node()
+        tx.create(artist_node)
         tx.process()
+        return artist_node
 
 main()
