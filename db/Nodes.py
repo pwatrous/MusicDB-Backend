@@ -31,6 +31,7 @@ def node_exists(label, node):
     matcher = NodeMatcher(graph)
     return matcher.match(label, name=node.name).first()
 
+
 class Track(Node):
 
     def __init__(self, prop, features):
@@ -83,10 +84,7 @@ class Track(Node):
         for artist in self.artists:  # create Relationship: Artist CREATES Track
             artist_match = node_exists("Artist", artist)
             if artist_match is None:
-                print("adding: ", artist.name)
                 artist_match = artist.commit_to_graph(tx)
-            else:
-                print("already exists: ", artist.name)
             tx.create(rel.Creates(artist_match, track_node).as_graph_edge())
             tx.process()
 
