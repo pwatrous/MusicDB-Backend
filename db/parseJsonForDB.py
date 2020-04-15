@@ -48,6 +48,9 @@ def parse(path):
         song_details["album"] = album_details
 
         for artist in item["track"]["album"]["artists"]:
+            artist_details["name"] = artist["name"]
+            artist_details["href"] = artist["href"]
+            artist_details["id"] = artist["id"]
             song_details["artists"].append(artist_details)
 
         song_list.append(song_details)
